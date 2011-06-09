@@ -1,10 +1,11 @@
-require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+require 'spec_helper'
 
 describe Importex::Base do
   before(:each) do
     @simple_class = Class.new(Importex::Base)
     @xls_file = File.dirname(__FILE__) + '/../fixtures/simple.xls'
   end
+  
   
   it "should import simple excel doc" do
     @simple_class.column "Name"

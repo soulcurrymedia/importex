@@ -1,6 +1,6 @@
 class Integer
   def self.importex_value(str)
-    unless str.blank?
+    unless str.length == 0 || str == nil
       if str =~ /^[.\d]+$/
         str.to_i
       else
