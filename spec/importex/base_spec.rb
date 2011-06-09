@@ -60,4 +60,12 @@ describe Importex::Base do
       @simple_class.import(@xls_file)
     }.should raise_error(Importex::MissingColumn, "Column Foo is required but it doesn't exist.")
   end
+  
+  
+  describe "self.reset" do
+    it "resets the columns" do
+      @simple_class.reset
+      @simple_class.all.should be_nil
+    end
+  end
 end

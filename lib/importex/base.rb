@@ -64,6 +64,11 @@ module Importex
       @records
     end
     
+    # Resets all records
+    def self.reset
+      @records = nil
+    end
+    
     def initialize(attributes = {})
       @attributes = attributes
     end
