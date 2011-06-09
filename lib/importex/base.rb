@@ -33,7 +33,7 @@ module Importex
       workbook = Spreadsheet::ParseExcel.parse(path)
       worksheet = workbook.worksheet(worksheet_index)
       columns = worksheet.row(0).map do |cell|
-        @columns.detect { |column| column.name == cell.to_s('latin1') }
+        @columns.detect { |column| column.name == cell.to_s('UTF-8') }
       end
       (@columns.select(&:required?) - columns).each do |column|
         raise MissingColumn, "Column #{column.name} is required but it doesn't exist."

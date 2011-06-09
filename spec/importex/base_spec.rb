@@ -14,6 +14,12 @@ describe Importex::Base do
     @simple_class.all.map(&:attributes).should == [{"Name" => "Foo", "Age" => 27}, {"Name" => "Bar", "Age" => 42}]
   end
   
+  it "should import columns with strange characters" do
+    @simple_class.column "Såøæk", :required => true
+    @simple_class.import(@xls_file)
+    @simple_class.all.map(&:attributes).should == [{"Såøæk" => "TRUE"}, {"Såøæk" => "FALSE"}]
+  end
+  
   it "should import only the column given and ignore others" do
     @simple_class.column "Age", :type => Integer
     @simple_class.column "Nothing"
