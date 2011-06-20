@@ -36,6 +36,12 @@ class Time
   end
 end
 
+class String
+  def self.importex_value(str)
+    str
+  end
+end
+
 class Date
   def self.importex_value(str)
     Date.parse(str) unless str.blank?
