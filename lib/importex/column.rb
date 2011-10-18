@@ -7,13 +7,20 @@ module Importex
       @type = options[:type]
       @format = [options[:format]].compact.flatten
       @required = options[:required]
+      @validate_presence = options[:validate_presence]
     end
   
     def cell_value(str, row_number)
+      if validate_presence? && str.empty?
+        raise InvalidCell, "(column #{name}, row #{row_number+1}) can't be blank"
+      else
+        begin
       validate_cell(str)
-      @type ? @type.importex_value(str) : str
+          (@type && (validate_presence? || !str.empty?)) ? @type.importex_value(str) : str
     rescue InvalidCell => e
       raise InvalidCell, "#{str} (column #{name}, row #{row_number+1}) does not match required format: #{e.message}"
+        end
+      end
     end
     
     def validate_cell(str)
@@ -32,6 +39,10 @@ module Importex
     
     def required?
       @required
+    end
+
+    def validate_presence?
+      @validate_presence
     end
   end
 end
