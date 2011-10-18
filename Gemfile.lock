@@ -2,7 +2,6 @@ GEM
   remote: http://rubygems.org/
   specs:
     diff-lcs (1.1.2)
-    parseexcel (0.5.2)
     rr (1.0.2)
     rspec (2.6.0)
       rspec-core (~> 2.6.0)
@@ -12,11 +11,14 @@ GEM
     rspec-expectations (2.6.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.6.0)
+    ruby-ole (1.2.11.1)
+    spreadsheet (0.6.5.4)
+      ruby-ole (>= 1.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  parseexcel
   rr
   rspec
+  spreadsheet
