@@ -22,23 +22,27 @@ describe Importex::Base do
   
   it "should add restrictions through an array of strings or regular expressions" do
     @simple_class.column "Age", :format => ["foo", /bar/]
-    lambda {
-      @simple_class.import(@xls_file)
-    }.should raise_error(Importex::InvalidCell, '27 (column Age, row 2) does not match required format: ["foo", /bar/]')
+    @simple_class.import(@xls_file)
+    @simple_class.with_errors.count.should be_equal 3
+    @simple_class.with_errors.first.errors[:age].should be_include('format error: ["foo", /bar/]')
   end
   
   it "should support a lambda as a requirement" do
     @simple_class.column "Age", :format => lambda { |age| age.to_i < 30 }
-    lambda {
-      @simple_class.import(@xls_file)
-    }.should raise_error(Importex::InvalidCell, '42 (column Age, row 3) does not match required format: []')
+    @simple_class.import(@xls_file)
+
+    @simple_class.with_errors.count.should be_equal 1
+    @simple_class.with_errors.first.errors[:age].should be_include('format error: []')
+
   end
   
   it "should have some default requirements" do
     @simple_class.column "Name", :type => Integer
-    lambda {
-      @simple_class.import(@xls_file)
-    }.should raise_error(Importex::InvalidCell, 'Foo (column Name, row 2) does not match required format: Not a Integer.')
+    @simple_class.import(@xls_file)
+
+    @simple_class.with_errors.count.should be_equal 3
+    @simple_class.with_errors.first.errors[:name].should be_include('Not an Integer.')
+
   end
   
   it "should have a [] method which returns attributes" do
@@ -62,9 +66,11 @@ describe Importex::Base do
 
   it "should raise an exception if required value is missing" do
     @simple_class.column "Rank", :validate_presence => true
-    lambda {
-      @simple_class.import(@xls_file)
-    }.should raise_error(Importex::InvalidCell, "(column Rank, row 4) can't be blank")
+    @simple_class.import(@xls_file)
+
+    @simple_class.with_errors.count.should be_equal 1
+    @simple_class.with_errors.first.errors[:rank].should be_include('can\'t be blank')
+
   end
 
 end

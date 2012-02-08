@@ -4,7 +4,7 @@ class Integer
       if ((str =~ /^[\.\d]+$/) || (str.is_a?(Integer)) || (str.is_a?(Float))) && (str.to_f.to_i == str.to_i)
         str.to_i
       else
-        raise Importex::InvalidCell, "Not a Integer."
+        raise Importex::InvalidCell, "Not an Integer."
       end
     end
   end
