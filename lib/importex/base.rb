@@ -1,7 +1,10 @@
 module Importex
   class Base
-    attr_reader :attributes
     
+    attr_reader :attributes
+    attr_reader :row_number
+    attr_accessor :errors
+
     # Defines a column that may be found in the excel document. The first argument is a string
     # representing the name of the column. The second argument is a hash of options.
     # 
@@ -29,7 +32,7 @@ module Importex
     # will default to the first one (0). The first row in the Excel document should be the column
     # names, all rows after that should be records.
     def self.import(path, worksheet_index = 0)
-      @records ||= []
+      @records = []
       workbook = Spreadsheet.open(path)
       worksheet = workbook.worksheet(worksheet_index)
 
@@ -44,7 +47,8 @@ module Importex
       (1...worksheet.row_count).each do |row_number|
         row = worksheet.row(row_number)
         unless row.at(0).nil?
-          attributes = {}
+          attributes = {:row_number => row_number}
+          errors = {}
           columns.each_with_index do |column, index|
             if column
               if row.at(index).nil?
@@ -54,10 +58,19 @@ module Importex
               else
                 value = row.at(index)
               end
-              attributes[column.name] = column.cell_value(value, row_number)
+              
+              if column.valid_cell?(value)
+                attributes[column.name] = column.cell_value(value)
+              else
+                errors[column.name.downcase.to_sym] = column.errors
+              end
+              
             end
           end
-          @records << new(attributes)
+
+          record = new(attributes)
+          record.errors = errors
+          @records << record
         end
       end
     end
@@ -66,8 +79,20 @@ module Importex
     def self.all
       @records
     end
+
+    # Returns all records imported from the excel document with errors.
+    def self.with_errors
+      @records.reject{|r| r.errors.blank?}
+    end
+
+
+    # Returns all records imported from the excel document with errors.
+    def self.without_errors
+      @records.select{|r| r.errors.blank?}
+    end
     
     def initialize(attributes = {})
+      @row_number = attributes.delete(:row_number)
       @attributes = attributes
     end
     
