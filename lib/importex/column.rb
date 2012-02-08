@@ -1,6 +1,7 @@
 module Importex
   class Column
     attr_reader :name
+    attr_accessor :errors
   
     def initialize(name, options = {})
       @name = name
@@ -10,23 +11,31 @@ module Importex
       @validate_presence = options[:validate_presence]
     end
   
-    def cell_value(str, row_number)
-      if validate_presence? && str.to_s.empty?
-        raise InvalidCell, "(column #{name}, row #{row_number+1}) can't be blank"
-      else
-        begin
-      validate_cell(str)
-          (@type && (validate_presence? || !str.to_s.empty?)) ? @type.importex_value(str) : str
-    rescue InvalidCell => e
-      raise InvalidCell, "#{str} (column #{name}, row #{row_number+1}) does not match required format: #{e.message}"
-        end
-      end
+    def cell_value(str)
+      @type ? @type.importex_value(str) : str
     end
-    
-    def validate_cell(str)
-      if @format && !@format.empty? && !@format.any? { |format| match_format?(str, format) }
-        raise InvalidCell, @format.reject { |r| r.kind_of? Proc }.inspect
+
+    def validate_cell(value)
+      self.errors = []
+      # If we shoud validate presence and the str is empty, error
+      self.errors << "can't be blank" if validate_presence? && value.to_s.empty? 
+
+      # we try to get the importex_value of the field. If we have an exception, there's an error
+      begin
+        @type.importex_value(value) unless @type.nil?
+      rescue InvalidCell => e
+        self.errors << e.message
       end
+
+      # we check the format of the cell
+      if @format && !@format.empty? && !@format.any? { |format| match_format?(value, format) }
+        self.errors << "format error: #{@format.reject { |r| r.kind_of? Proc }.inspect}"
+      end      
+    end
+
+    def valid_cell?(value)
+      validate_cell(value)
+      self.errors.blank?
     end
     
     def match_format?(str, format)
