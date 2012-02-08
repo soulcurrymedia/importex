@@ -45,33 +45,32 @@ module Importex
       raise MissingColumn, "Columns #{missing_columns.map(&:name).join(",")} is/are required but it doesn't exist in #{columns.compact.map(&:name).join(",")}." unless missing_columns.blank?
       
       (1...worksheet.row_count).each do |row_number|
-        row = worksheet.row(row_number)
-        unless row.at(0).nil?
-          attributes = {:row_number => row_number}
-          errors = {}
-          columns.each_with_index do |column, index|
-            if column
-              if row.at(index).nil?
-                value = ""
-              elsif row.at(index).class == :date
-                value = row.at(index).date.strftime("%Y-%m-%d %H:%M:%I")
-              else
-                value = row.at(index)
-              end
-              
-              if column.valid_cell?(value)
-                attributes[column.name] = column.cell_value(value)
-              else
-                errors[column.name.downcase.to_sym] = column.errors
-              end
-              
-            end
-          end
 
-          record = new(attributes)
-          record.errors = errors
-          @records << record
+        row = worksheet.row(row_number)
+        attributes = {:row_number => row_number}
+        errors = {}
+        columns.each_with_index do |column, index|
+          if column
+            if row.at(index).nil?
+              value = ""
+            elsif row.at(index).class == :date
+              value = row.at(index).date.strftime("%Y-%m-%d %H:%M:%I")
+            else
+              value = row.at(index)
+            end
+            
+            if column.valid_cell?(value)
+              attributes[column.name] = column.cell_value(value)
+            else
+              errors[column.name.downcase.to_sym] = column.errors
+            end
+            
+          end
         end
+
+        record = new(attributes)
+        record.errors = errors
+        @records << record
       end
     end
     
