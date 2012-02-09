@@ -114,12 +114,17 @@ module Importex
 
     # This methods translates all (valid and invalid) records
     def self.translate_all
-      @translated_records = []
+      translate all
+    end
 
-      @records.each do |record|
-        @translated_records << record.translate
-      end
-      @translated_records
+    # This methods translates valid records
+    def self.translate_valid
+      translate valid
+    end
+
+    # This methods translates invalid records
+    def self.translate_invalid
+      translate invalid
     end
 
     # And this method performs translation to a single row
@@ -132,6 +137,18 @@ module Importex
         column.translate translated_object, self
       end
       translated_object
+    end
+
+    protected
+
+    def self.translate records
+      @translated_records = []
+
+      records.each do |record|
+        @translated_records << record.translate
+      end
+
+      @translated_records
     end
 
   end
