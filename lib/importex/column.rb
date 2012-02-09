@@ -54,5 +54,12 @@ module Importex
     def validate_presence?
       @validate_presence
     end
+
+    # Translation logic in columns
+    def translate object, row
+      object.send("#{name.downcase}=", row.attributes[name])
+      object
+    end
+
   end
 end

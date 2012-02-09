@@ -5,6 +5,9 @@ module Importex
     attr_reader :row_number
     attr_accessor :errors
 
+    cattr_accessor :translated_class
+    cattr_accessor :columns
+
     # Defines a column that may be found in the excel document. The first argument is a string
     # representing the name of the column. The second argument is a hash of options.
     # 
@@ -24,8 +27,8 @@ module Importex
     #   Boolean specifying whether or not the given column must be present in the Excel document.
     #   Defaults to false.
     def self.column(*args)
-      @columns ||= []
-      @columns << Column.new(*args)
+      self.columns ||= []
+      self.columns << Column.new(*args)
     end
     
     # Pass a path to an Excel (xls) document and optionally the worksheet index. The worksheet
@@ -37,10 +40,10 @@ module Importex
       worksheet = workbook.worksheet(worksheet_index)
 
       columns = worksheet.row(0).map do |cell|
-        @columns.detect { |column| column.name == cell.to_s }
+        self.columns.detect { |column| column.name == cell.to_s }
       end
 
-      missing_columns = @columns.select(&:required?) - columns
+      missing_columns = self.columns.select(&:required?) - columns
 
       raise MissingColumn, "Columns #{missing_columns.map(&:name).join(",")} is/are required but it doesn't exist in #{columns.compact.map(&:name).join(",")}." unless missing_columns.blank?
       
@@ -102,5 +105,33 @@ module Importex
     def [](name)
       @attributes[name]
     end
+
+    # This methods register to which class we umust translate this one
+    def self.translate_to(class_name)
+      self.translated_class = class_name.constantize      
+    end
+
+    # This methods translates all (valid and invalid) records
+    def self.translate_all
+      @translated_records = []
+
+      @records.each do |record|
+        @translated_records << record.translate
+      end
+      @translated_records
+    end
+
+    # And this method performs translation to a single row
+    # Right now, for each column we fall into the default column behaviour
+    def translate
+
+      translated_object = @@translated_class.new
+      
+      @@columns.each do |column|        
+        column.translate translated_object, self
+      end
+      translated_object
+    end
+
   end
 end
