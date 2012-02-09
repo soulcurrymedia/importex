@@ -7,6 +7,7 @@ module Importex
 
     cattr_accessor :translated_class
     cattr_accessor :columns
+    self.columns = []
 
     # Defines a column that may be found in the excel document. The first argument is a string
     # representing the name of the column. The second argument is a hash of options.
@@ -83,13 +84,13 @@ module Importex
     end
 
     # Returns all records imported from the excel document with errors.
-    def self.with_errors
+    def self.invalid
       @records.reject{|r| r.errors.blank?}
     end
 
 
     # Returns all records imported from the excel document with errors.
-    def self.without_errors
+    def self.valid
       @records.select{|r| r.errors.blank?}
     end
     
