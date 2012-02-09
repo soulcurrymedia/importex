@@ -1,30 +1,32 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 require File.expand_path(File.dirname(__FILE__) + '/../fixtures/dummy_class.rb')
+require File.expand_path(File.dirname(__FILE__) + '/../fixtures/import_class1.rb')
 describe Importex::Base do
 
   before(:each) do
-    @simple_class = Class.new(Importex::Base)
     @xls_file = File.dirname(__FILE__) + '/../fixtures/simple.xls'
   end
 
-  it "should store translation options" do
-    @simple_class.columns.clear
-    @simple_class.column "Name"
-    @simple_class.column "Age", :type => Integer
-    @simple_class.translate_to DummyClass.name
+  after(:each) do
+    ImportClass1.columns.clear
+  end
 
-    @simple_class.translated_class.should == DummyClass
+  it "should store translation options" do
+    ImportClass1.column "Name"
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name
+
+    ImportClass1.translated_class.should == DummyClass
   end
 
   it "should translate all rows" do
-    @simple_class.columns.clear
-    @simple_class.column "Name"
-    @simple_class.column "Age", :type => Integer
-    @simple_class.translate_to DummyClass.name
+    ImportClass1.column "Name"
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name
 
-    @simple_class.import(@xls_file)
+    ImportClass1.import(@xls_file)
 
-    dummy_objects = @simple_class.translate_all
+    dummy_objects = ImportClass1.translate_all
 
     attributes = [
       {"Name" => "Foo", "Age" => 27}, # First row
@@ -42,14 +44,13 @@ describe Importex::Base do
   end
 
   it "should translate only valid rows when required" do
-    @simple_class.columns.clear
-    @simple_class.column "Name", :validate_presence => true
-    @simple_class.column "Age", :type => Integer
-    @simple_class.translate_to DummyClass.name
+    ImportClass1.column "Name", :validate_presence => true
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name
 
-    @simple_class.import(@xls_file)
+    ImportClass1.import(@xls_file)
 
-    dummy_objects = @simple_class.translate_valid
+    dummy_objects = ImportClass1.translate_valid
 
     attributes = [
       {"Name" => "Foo", "Age" => 27}, # First row
@@ -69,14 +70,13 @@ describe Importex::Base do
   end
 
   it "should translate only valid rows when required" do
-    @simple_class.columns.clear
-    @simple_class.column "Name", :validate_presence => true
-    @simple_class.column "Age", :type => Integer
-    @simple_class.translate_to DummyClass.name
+        ImportClass1.column "Name", :validate_presence => true
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name
 
-    @simple_class.import(@xls_file)
+    ImportClass1.import(@xls_file)
 
-    dummy_objects = @simple_class.translate_invalid
+    dummy_objects = ImportClass1.translate_invalid
 
     attributes = [
       {"Name" => nil, "Age" => 25} # Fourth row
