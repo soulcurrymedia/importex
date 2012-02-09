@@ -78,4 +78,20 @@ describe Importex::Base do
 
   end
 
+  it "should import different classes with different settings " do
+    ImportClass1.column "Name"
+    ImportClass1.column "Age", :type => Integer
+
+    ImportClass2.column "Name", :validate_presence => true
+    ImportClass2.column "Rank", :type => Integer
+
+
+    ImportClass1.import(@xls_file)
+    ImportClass2.import(@xls_file)
+
+    ImportClass1.valid.map(&:attributes).should == [{"Name" => "Foo", "Age" => 27}, {"Name" => "Bar", "Age" => 42}, {"Name"=>"Blue", "Age"=>28}, {"Name" => "", "Age" => 25}]
+
+    ImportClass2.valid.map(&:attributes).should == [{"Name" => "Foo", "Rank" => 1}, {"Name" => "Bar", "Rank" => 2}, {"Name" => "Blue", "Rank" => nil}]
+  end
+
 end
