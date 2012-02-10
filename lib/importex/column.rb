@@ -86,7 +86,14 @@ module Importex
 
     def field_translation object, row
       value = row.attributes[name].to_s.empty? ? nil : row.attributes[name]
-      object.send("#{@translation.to_s.downcase}=", value)
+
+      methods = @translation.to_s.split(".")
+      attribute = methods.pop
+
+      result = object
+      methods.each{|m| result = result.send(m)}
+
+      result.send("#{attribute}=", value)
     end
 
 

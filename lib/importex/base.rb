@@ -24,7 +24,6 @@ module Importex
     #   Boolean specifying whether or not the given column must be present in the Excel document.
     #   Defaults to false.
     def self.column(*args)
-      self.cattr_accessor :translated_class
       self.cattr_accessor :columns
       self.columns ||= []
       self.columns << Column.new(*args)
@@ -107,6 +106,7 @@ module Importex
 
     # This methods register to which class we umust translate this one
     def self.translate_to(class_name)
+      self.cattr_accessor :translated_class
       self.translated_class = class_name.constantize
     end
 
