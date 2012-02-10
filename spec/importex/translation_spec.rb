@@ -100,6 +100,28 @@ describe Importex::Base do
   end
 
 
+  it "should translate fields by using a proc" do
+    ImportClass1.column "Name", :translation => Proc.new{ |object, row| object.name = row.attributes["Name"].upcase}
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name
+
+    ImportClass1.import(@xls_file)
+
+    dummy_objects = ImportClass1.translate_all
+
+    rows = [
+      {"Name" => "FOO", "Age" => 27}, # First row
+      {"Name" => "BAR", "Age" => 42}, # Second row
+      {"Name"=>"BLUE", "Age"=>28}, # Third row
+      {"Name" => "", "Age" => 25} # Fourth row
+    ]
+
+
+    check_rows rows, dummy_objects
+
+  end
+
+
 end
 
 def check_rows rows, objects
