@@ -49,30 +49,35 @@ module Importex
       (1...worksheet.row_count).each do |row_number|
 
         row = worksheet.row(row_number)
-        attributes = {:row_number => row_number}
-        errors = {}
-        columns.each_with_index do |column, index|
-          if column
-            if row.at(index).nil?
-              value = ""
-            elsif row.at(index).class == :date
-              value = row.at(index).date.strftime("%Y-%m-%d %H:%M:%I")
-            else
-              value = row.at(index)
-            end
 
-            if column.valid_cell?(value)
-              attributes[column.name] = column.cell_value(value)
-            else
-              errors[column.name.downcase.to_sym] = column.errors
-            end
+        # If this row has no cell with content we don't use it
+        # This way we skip blank rows without content that only has styles
+        if row.detect{|cell| !cell.nil?}
+          attributes = {:row_number => row_number}
+          errors = {}
+          columns.each_with_index do |column, index|
+            if column
+              if row.at(index).nil?
+                value = ""
+              elsif row.at(index).class == :date
+                value = row.at(index).date.strftime("%Y-%m-%d %H:%M:%I")
+              else
+                value = row.at(index)
+              end
 
+              if column.valid_cell?(value)
+                attributes[column.name] = column.cell_value(value)
+              else
+                errors[column.name.downcase.to_sym] = column.errors
+              end
+
+            end
           end
-        end
 
-        record = new(attributes)
-        record.errors = errors
-        @records << record
+          record = new(attributes)
+          record.errors = errors
+          @records << record
+        end
       end
     end
 
