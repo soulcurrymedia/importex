@@ -36,6 +36,7 @@ module Importex
       @records = []
       workbook = Spreadsheet.open(path)
       worksheet = workbook.worksheet(worksheet_index)
+      worksheet_columns = worksheet.row(0)
 
       columns = worksheet.row(0).map do |cell|
         self.columns.detect { |column| column.name == cell.to_s }
@@ -43,7 +44,7 @@ module Importex
 
       missing_columns = self.columns.select(&:required?) - columns
 
-      raise MissingColumn, "Columns #{missing_columns.map(&:name).join(",")} is/are required but it doesn't exist in #{columns.compact.map(&:name).join(",")}." unless missing_columns.blank?
+      raise MissingColumn, "Columns #{missing_columns.map{|c| "'#{c.name}'"}.join(", ")} is/are required but it doesn't exist in #{worksheet_columns.map{|c| "'#{c.to_s}'"}.join(", ")}." unless missing_columns.blank?
 
       (1...worksheet.row_count).each do |row_number|
 
