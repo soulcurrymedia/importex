@@ -71,6 +71,8 @@ module Importex
         elsif @translation.is_a? Proc
         # If it has its own logic, we just execute it
           @translation
+        else
+          Proc.new {}
       end
 
       translation_proc.call object, row
