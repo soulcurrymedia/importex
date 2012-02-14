@@ -4,6 +4,7 @@ module Importex
     attr_reader :attributes
     attr_reader :row_number
     attr_accessor :errors
+    attr_reader :translated_object
 
     # Defines a column that may be found in the excel document. The first argument is a string
     # representing the name of the column. The second argument is a hash of options.
@@ -111,9 +112,13 @@ module Importex
     end
 
     # This methods register to which class we umust translate this one
-    def self.translate_to(class_name)
+    def self.translate_to(class_name, options={})
+
       self.cattr_accessor :translated_class
+      self.cattr_accessor :after_translate
+
       self.translated_class = class_name.constantize
+      self.after_translate = options[:after]
     end
 
     # This methods translates all (valid and invalid) records
@@ -135,24 +140,26 @@ module Importex
     # Right now, for each column we fall into the default column behaviour
     def translate
 
-      translated_object = self.translated_class.new
+      @translated_object = self.translated_class.new
 
       self.columns.each do |column|
         column.translate translated_object, self
       end
-      translated_object
+      @translated_object
+
     end
 
     protected
 
     def self.translate records
-      @translated_records = []
 
-      records.each do |record|
-        @translated_records << record.translate
-      end
+      # First we translate the records
+      records.each(&:translate)
+      # Then we execute the after Proc in case we need some extra computing
+      self.after_translate.call(records) unless self.after_translate.nil?
+      # And now we return the translated objects
+      records.map(&:translated_object)
 
-      @translated_records
     end
 
   end

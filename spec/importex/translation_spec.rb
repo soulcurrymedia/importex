@@ -61,7 +61,7 @@ describe Importex::Base do
   end
 
 
-  it "should translate only valid rows when required" do
+  it "should translate only invalid rows when required" do
     ImportClass1.column "Name", :validate_presence => true
     ImportClass1.column "Age", :type => Integer
     ImportClass1.translate_to DummyClass.name
@@ -140,6 +140,45 @@ describe Importex::Base do
       {"Name" => "", "Age" => 25} # Fourth row
     ]
 
+
+    check_rows rows, dummy_objects
+
+  end
+
+  it "should allow some postprocessing on the translation" do
+    ImportClass1.column "Name", :validate_presence => true
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name,
+      :after => Proc.new{ |records|
+
+
+        translated_records = records.map(&:translated_object)
+
+        translated_records.each do |record|
+          translated_records.each do |other_record|
+            if record != other_record && !record.younger.include?(other_record) && !record.older.include?(other_record)
+
+              older = record.age > other_record.age ? record : other_record
+              younger = record.age <= other_record.age ? record : other_record
+
+              younger.older << older
+              older.younger << younger
+
+            end
+          end
+        end
+
+      }
+
+    ImportClass1.import(@xls_file)
+
+    dummy_objects = ImportClass1.translate_valid
+
+    rows = [
+      {"Name" => "Foo", "Age" => 27, "younger_count" => 0, "older_count" => 2}, # First row
+      {"Name" => "Bar", "Age" => 42, "younger_count" => 2, "older_count" => 0}, # Second row
+      {"Name"=>"Blue", "Age"=>28, "younger_count" => 1, "older_count" => 1}, # Third row
+    ]
 
     check_rows rows, dummy_objects
 
