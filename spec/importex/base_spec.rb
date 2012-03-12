@@ -94,4 +94,34 @@ describe Importex::Base do
     ImportClass2.valid.map(&:attributes).should == [{"Name" => "Foo", "Rank" => 1}, {"Name" => "Bar", "Rank" => 2}, {"Name" => "Blue", "Rank" => nil}]
   end
 
+  it "should validate rows when all of them have been imported" do
+    ImportClass1.column "Name"
+    ImportClass1.column "Age", :type => Integer
+
+    # We create a validation method for the class
+    class ImportClass1
+      def self.validate_all
+        average_age = @records.map{|r| r["Age"]}.inject(&:+).to_f/@records.length
+        @records.select{|r| r["Age"] > average_age + 10}.each do |r|
+          r.errors[:age] ||= []
+          r.errors[:age] << "Too old"
+        end
+        @records
+      end
+    end
+
+    ImportClass1.import(@xls_file)
+    ImportClass1.all.map(&:attributes).should eql([{"Name" => "Foo", "Age" => 27}, {"Name" => "Bar", "Age" => 42}, {"Name"=>"Blue", "Age"=>28}, {"Name" => "", "Age" => 25}])
+    ImportClass1.valid.map(&:attributes).should eql([{"Name" => "Foo", "Age" => 27}, {"Name"=>"Blue", "Age"=>28}, {"Name" => "", "Age" => 25}])
+    ImportClass1.invalid.map(&:attributes).should eql([{"Name" => "Bar", "Age" => 42}])
+
+    # We restore the class to its previous state so other tests are not affected
+    class ImportClass1
+      def self.validate_all
+        @records
+      end
+    end
+
+  end
+
 end
