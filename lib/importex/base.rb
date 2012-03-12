@@ -80,6 +80,13 @@ module Importex
           @records << record
         end
       end
+
+      if self.respond_to? :validate_all
+        self.validate_all
+      end
+
+      @records
+
     end
 
     # Returns all records imported from the excel document.
