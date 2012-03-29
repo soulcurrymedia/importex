@@ -10,6 +10,9 @@ module Importex
       @required = options[:required]
       @validate_presence = options[:validate_presence]
 
+      # We store an array of Proc objects for validation
+      @validation = options[:validate].is_a?(Proc) ? [options[:validate]] : options[:validate]
+
       # We store a Proc object for translation
       @translation = options[:translation]
 
@@ -35,6 +38,12 @@ module Importex
       if @format && !@format.empty? && !@format.any? { |format| match_format?(value, format) }
         self.errors << "format error: #{@format.reject { |r| r.kind_of? Proc }.inspect}"
       end
+
+      if @validation
+        self.errors << @validation.map{|v| v.call value}.compact
+      end
+
+      self.errors = self.errors.flatten
     end
 
     def valid_cell?(value)
