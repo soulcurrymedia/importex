@@ -40,7 +40,8 @@ module Importex
       end
 
       if @validation
-        self.errors << @validation.map{|v| v.call value}.compact
+        validating_value = @type.nil? ? value : @type.importex_value(value)
+        self.errors << @validation.map{|v| v.call validating_value}.compact
       end
 
       self.errors = self.errors.flatten
