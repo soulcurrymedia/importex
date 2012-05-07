@@ -22,7 +22,7 @@ module Importex
       @type ? @type.importex_value(str) : str
     end
 
-    def validate_cell(value)
+    def validate_cell(value, row_context)
       self.errors = []
       # If we shoud validate presence and the str is empty, error
       self.errors << "can't be blank" if validate_presence? && value.to_s.empty?
@@ -41,14 +41,14 @@ module Importex
 
       if @validation
         validating_value = @type.nil? ? value : @type.importex_value(value)
-        self.errors << @validation.map{|v| v.call validating_value}.compact
+        self.errors << @validation.map{|v| v.call validating_value, row_context}.compact
       end
 
       self.errors = self.errors.flatten
     end
 
-    def valid_cell?(value)
-      validate_cell(value)
+    def valid_cell?(value, row_context)
+      validate_cell(value, row_context)
       self.errors.blank?
     end
 

@@ -56,6 +56,7 @@ module Importex
         if row.detect{|cell| !cell.nil?}
           attributes = {:row_number => row_number}
           errors = {}
+          record = new(attributes)
           columns.each_with_index do |column, index|
             if column
               if row.at(index).nil?
@@ -66,7 +67,7 @@ module Importex
                 value = row.at(index)
               end
 
-              if column.valid_cell?(value)
+              if column.valid_cell?(value, record)
                 attributes[column.name] = column.cell_value(value)
               else
                 errors[column.name.downcase.to_sym] = column.errors
@@ -75,7 +76,6 @@ module Importex
             end
           end
 
-          record = new(attributes)
           record.errors = errors
           @records << record
         end
