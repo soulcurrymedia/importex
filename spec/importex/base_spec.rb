@@ -126,7 +126,7 @@ describe Importex::Base do
 
   it "should perform custom validations" do
     ImportClass1.column "Name"
-    ImportClass1.column "Age", :type => Integer, :validate => [Proc.new { |v| ["Too old"] if v > 30}]
+    ImportClass1.column "Age", :type => Integer, :validate => [Proc.new { |v, row| ["Too old"] if v > 30}]
 
     ImportClass1.import(@xls_file)
 
@@ -134,6 +134,22 @@ describe Importex::Base do
     ImportClass1.invalid.map(&:attributes).should  be_eql([{"Name" => "Bar"}])
 
     ImportClass1.invalid.first.errors[:age].should be_eql(["Too old"])
+
+  end
+
+  it "should take context on custom validations" do
+
+    ImportClass1.send :define_method, :never_old? do
+      self["Name"] == "Bar"
+    end
+
+    ImportClass1.column "Name"
+    ImportClass1.column "Age", :type => Integer, :validate => [Proc.new { |v, row| ["Too old"] if v > 30 && !row.never_old?}]
+
+    ImportClass1.import(@xls_file)
+
+    ImportClass1.valid.map(&:attributes).should  be_eql([{"Name" => "Foo", "Age" => 27}, {"Name" => "Bar", "Age" => 42}, {"Name" =>"Blue", "Age"=>28}, {"Name" => "", "Age" => 25}])
+    ImportClass1.invalid.map(&:attributes).should  be_empty
 
   end
 
