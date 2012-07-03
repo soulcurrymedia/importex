@@ -123,9 +123,11 @@ module Importex
 
       self.cattr_accessor :translated_class
       self.cattr_accessor :after_translate
+      self.cattr_accessor :initialize_translated_object
 
       self.translated_class = class_name.constantize
       self.after_translate = options[:after]
+      self.initialize_translated_object = options[:initialize]
     end
 
     # This methods translates all (valid and invalid) records
@@ -147,7 +149,9 @@ module Importex
     # Right now, for each column we fall into the default column behaviour
     def translate
 
-      @translated_object = self.translated_class.new
+      @translated_object = self.initialize_translated_object.nil? ?
+        self.translated_class.new :
+        initialize_translated_object.call(self)
 
       self.columns.each do |column|
         column.translate translated_object, self

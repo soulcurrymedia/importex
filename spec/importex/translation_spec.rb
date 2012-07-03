@@ -20,6 +20,26 @@ describe Importex::Base do
   end
 
 
+  it "should initialize the translated object" do
+    ImportClass1.column "Name"
+    ImportClass1.column "Age", :type => Integer
+    ImportClass1.translate_to DummyClass.name, :initialize => Proc.new {|row| d = DummyClass.new; d.id = row["Age"]; d }
+
+    ImportClass1.import(@xls_file)
+
+    dummy_objects = ImportClass1.translate_all
+
+    rows = [
+      {"id" => 27}, # First row
+      {"id" => 42}, # Second row
+      {"id" => 28}, # Third row
+      {"id" => 25} # Fourth row
+    ]
+
+    check_rows rows, dummy_objects
+
+  end
+
   it "should translate all rows" do
     ImportClass1.column "Name"
     ImportClass1.column "Age", :type => Integer
