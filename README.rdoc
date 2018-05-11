@@ -8,6 +8,9 @@ This is extracted from an internal set of administration scripts used for import
 
 Note: This library has some hacks and is not intended to be a full featured, production quality library. I designed it to fit my needs for importing records through internal administration scripts.
 
+== Updates
+  * Merged @brenes changes
+  * Updated spreadsheet gem to latest release
 
 == Installation
 
@@ -63,10 +66,10 @@ It is possible to have smart columns which reference other Ruby objects. Importe
       raise Importex::InvalidCell, "No category with that name."
     end
   end
-  
+
   class Product < Importex::Base
     column "Category", :type => Category
   end
-  
+
 Then product["Category"] will return an instance of the found Category.
 

@@ -24,7 +24,7 @@ module Importex
         begin
           validate_cell(str)
           (@type && (validate_presence? || !str.empty?)) ? @type.importex_value(str) : str
-        rescue InvalidCell => e``
+        rescue InvalidCell => e
           raise InvalidCell, "#{str} (column #{name}, row #{row_number+1}) does not match required format: #{e.message}"
         end
       end
