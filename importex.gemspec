@@ -14,7 +14,6 @@ Gem::Specification.new do |s|
   s.files = Dir["lib/**/*"] + Dir["spec/**/*"] + ["LICENSE", "README.rdoc", "Rakefile", "CHANGELOG.rdoc"]
   s.extra_rdoc_files = ["README.rdoc", "CHANGELOG.rdoc", "LICENSE"]
 
-  s.has_rdoc = true
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Importex", "--main", "README.rdoc"]
 
   s.add_dependency("spreadsheet", "~> 1.1.7")
